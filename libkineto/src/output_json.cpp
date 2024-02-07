@@ -285,7 +285,8 @@ void ChromeTraceLogger::handleActivity(
     duration = 0;
   }
 
-  if (op.type() ==  ActivityType::GPU_USER_ANNOTATION) {
+  if (op.type() ==  ActivityType::GPU_USER_ANNOTATION ||
+      op.type() ==  ActivityType::PRIVATEUSE1_USER_ANNOTATION) {
     // The GPU user annotations start at the same time as the
     // first associated GPU op. Since they appear later
     // in the trace file, this causes a visualization issue in Chrome.
@@ -296,7 +297,8 @@ void ChromeTraceLogger::handleActivity(
 
   std::string arg_values = "";
   if (op.correlationId() != 0) {
-    arg_values.append(fmt::format("\"External id\": {}", op.correlationId()));
+    arg_values.append(fmt::format("\"External id\": {}",
+      op.linkedActivity() ? op.linkedActivity()->correlationId() : op.correlationId()));
   }
   const std::string op_metadata = op.metadataJson();
   if (op_metadata.find_first_not_of(" \t\n") != std::string::npos) {
